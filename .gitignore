@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Entornos
+.venv/
+venv/
+.env
+
+# Datos locales de prueba / estado
+_selftest/
+*.jsonl
+schema_canary.json
+
+# OS / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "argos-watchdog"
+version = "0.1.0"
+description = "Watchdog de fallos silenciosos: detecta sistemas que están 'arriba' pero dejaron de hacer su trabajo."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Cristian Amigo" }]
+keywords = ["monitoring", "observability", "watchdog", "silent-failure", "sre", "uptime", "cron"]
+dependencies = [
+    "pyyaml>=5.4",
+]
+
+[project.optional-dependencies]
+process = ["psutil>=5.8"]   # chequeos de tipo 'process' (proceso vivo)
+
+[project.scripts]
+argos-watchdog = "argos_watchdog.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["argos_watchdog*"]

@@ -1,0 +1,64 @@
+# argos-watchdog — config de ejemplo. Copia, edita las rutas, y corre:
+#   argos-watchdog examples/quickstart.yaml
+#
+# La idea: describes QUÉ significa "sano" para cada sistema. El watchdog verifica
+# la REALIDAD (archivo/proceso/puerto/lazo), no la palabra del propio sistema.
+
+name: "Mi Ecosistema"
+
+# Opcional: alertas. Apuntan a variables de ENTORNO (no pongas secretos aquí).
+notify:
+  telegram_token_env: TELEGRAM_BOT_TOKEN
+  telegram_chat_env: TELEGRAM_CHAT_ID
+  healthcheck_url_env: HEALTHCHECK_URL   # Dead Man's Switch (healthchecks.io): si el watchdog muere, te avisa
+
+checks:
+  # 1) ¿El bot escribe su log? Frío = vivo pero sin trabajar (FALLO SILENCIOSO).
+  - name: "Bot de trading"
+    type: file_fresh
+    path: "C:/ruta/al/bot.log"
+    max_age: 120          # segundos; ajusta a la cadencia real del componente
+    criticality: 5        # 5 = toca dinero
+
+  # 2) ¿Un dato que se actualiza 1×/día sigue fresco? (cadencia diaria => TTL ~25h, no 2h)
+  - name: "Niveles del día"
+    type: file_fresh
+    path: "C:/ruta/market_levels.json"
+    max_age: 90000
+
+  # 3) ¿El daemon está vivo? (requiere: pip install argos-watchdog[process])
+  - name: "Daemon recolector"
+    type: process
+    needle: "harvester.py"
+
+  # 4) ¿La API responde? on-demand => si está apagada es UNKNOWN, no CRÍTICO (evita falsos positivos)
+  - name: "API interna"
+    type: http
+    url: "http://127.0.0.1:8000/health"
+    optional: true
+
+  # 5) EL DIFERENCIADOR: ¿el lazo CIERRA? Produce registros pero ¿los resuelve?
+  #    Caso real: un sistema loguea predicciones y NUNCA las califica -> roto semanas, "se ve verde".
+  - name: "Pipeline de validación"
+    type: loop
+    produced: { path: "C:/ruta/predicciones.jsonl" }              # total producido (líneas)
+    resolved: { path: "C:/ruta/predicciones.jsonl", field: "resolved_at" }  # resueltas (con ese campo)
+    max_lag: 50           # si producidas - resueltas > 50 => el lazo está roto
+    criticality: 4
+
+  # 6) ¿La tarea programada existe, está habilitada y su último run fue OK? (Windows)
+  #    Caza el cron deshabilitado o el resolver sin tarea (validación fantasma).
+  - name: "Resolver diario"
+    type: scheduled_task
+    task: "Mi_Tarea_Programada"
+
+  # 7) ¿La muestra de medición está contaminada por duplicados? (inflan accuracy/EV)
+  - name: "Histórico de señales"
+    type: idempotency
+    path: "C:/ruta/signals_history.jsonl"
+    keys: ["asset", "date"]
+
+  # 8) ¿Hay procesos Python corriendo que NADIE declaró vigilar? (sistema no vigilado)
+  - name: "Descubrimiento"
+    type: discovery
+    expected: ["mi_bot.py", "mi_daemon.py"]   # lo que SÍ esperas ver vivo

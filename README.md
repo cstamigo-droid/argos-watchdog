@@ -38,7 +38,7 @@ pip install argos-watchdog[process]   # + chequeos de "proceso vivo" (psutil)
 
 ```bash
 # 1. copia el ejemplo y edita las rutas
-cp examples/quickstart.yaml mi-config.yaml
+cp examples/quickstart.yaml mi-config.yaml      # Windows: copy examples\quickstart.yaml mi-config.yaml
 
 # 2. una pasada
 argos-watchdog mi-config.yaml
@@ -46,6 +46,10 @@ argos-watchdog mi-config.yaml
 # 3. vigilancia continua + alerta Telegram en CRÍTICOS
 argos-watchdog mi-config.yaml --watch 300 --notify
 ```
+
+> Verificado end-to-end en Python 3.14 (Windows): el check `loop` distingue un pipeline roto
+> (CRÍTICO, exit 2) de uno sano (OK), `idempotency` caza duplicados reales y los `guards`
+> rechazan el sizing que excede el tope. Probado contra el código, no contra el papel.
 
 Sale con código `2` si hay CRÍTICOS (para que un cron externo vigile **al propio watchdog** —
 el monitor que vigila al monitor).

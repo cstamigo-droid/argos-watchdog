@@ -1,5 +1,7 @@
 # 🛡️ argos-watchdog
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org) [![Reliability](https://img.shields.io/badge/reliability-monitor-orange.svg)]()
+
 **Detecta cuando un sistema está "arriba" pero dejó de hacer su trabajo.**
 
 Los monitores normales (UptimeRobot, Datadog, healthchecks.io, cron pings) responden a una sola
